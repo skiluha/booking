@@ -39,7 +39,7 @@ ORDER BY id ASC
 	if err != nil {
 		return nil, err
 	}
-
+	defer rows.Close()
 	for rows.Next() {
 		var room model.Room
 		err = rows.Scan(
@@ -48,7 +48,7 @@ ORDER BY id ASC
 			&room.Capacity,
 		)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		rooms = append(rooms, room)
 	}
@@ -56,5 +56,39 @@ ORDER BY id ASC
 		return nil, err
 	}
 	return rooms, err
+}
 
+func GetRoombyId(
+	ctx context.Context,
+	conn *pgx.Conn,
+	id int,
+) (model.Room, error) {
+
+	sqlQuery := `
+SELECT id, name, capacity
+FROM rooms
+WHERE id = $1
+`
+	var room model.Room
+
+	err := conn.QueryRow(ctx, sqlQuery, id).Scan(&room.ID, &room.Name, &room.Capacity)
+	if err != nil {
+		return model.Room{}, err
+	}
+	return room, nil
+}
+
+func DeleteRooms(
+	ctx context.Context,
+	conn *pgx.Conn,
+	id int,
+) error {
+	sqlQuery := `
+DELETE FROM rooms
+WHERE id = $1`
+	_, err := conn.Exec(ctx, sqlQuery, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }

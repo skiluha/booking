@@ -34,3 +34,17 @@ func (s *RoomService) CreateRoom(
 func (s *RoomService) GetRooms(ctx context.Context) (rooms []model.Room, err error) {
 	return repository.GetRooms(ctx, s.conn)
 }
+
+func (s *RoomService) GetRoombyId(ctx context.Context, id int) (model.Room, error) {
+	if id <= 0 {
+		return model.Room{}, errors.New("invalid id")
+	}
+	return repository.GetRoombyId(ctx, s.conn, id)
+}
+
+func (s *RoomService) DeleteRoom(ctx context.Context, id int) error {
+	if id <= 0 {
+		return errors.New("invalid id")
+	}
+	return repository.DeleteRooms(ctx, s.conn, id)
+}
